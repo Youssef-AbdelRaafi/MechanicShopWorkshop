@@ -51,7 +51,7 @@ public sealed class RepairTask : AuditableEntity
         return new RepairTask(id, name.Trim(), laborCost, estimatedDurationInMins, parts);
     }
 
-    public Result<Success> UpsertParts(List<Part> incomingParts)
+    public Result<Updated> UpsertParts(List<Part> incomingParts)
     {
         _parts.RemoveAll(existing => incomingParts.All(p => p.Id != existing.Id));
 
@@ -72,10 +72,10 @@ public sealed class RepairTask : AuditableEntity
             }
         }
 
-        return Result.Success;
+        return Result.Updated;
     }
 
-    public Result<Success> Update(string name, decimal laborCost, RepairDurationInMinutes estimatedDurationInMins)
+    public Result<Updated> Update(string name, decimal laborCost, RepairDurationInMinutes estimatedDurationInMins)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -96,6 +96,6 @@ public sealed class RepairTask : AuditableEntity
         LaborCost = laborCost;
         EstimatedDurationInMins = estimatedDurationInMins;
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

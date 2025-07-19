@@ -19,14 +19,14 @@ public class UpdateWorkOrderStateCommandHandler(
     HybridCache cache,
     TimeProvider dateTime
     )
-    : IRequestHandler<UpdateWorkOrderStateCommand, Result<Success>>
+    : IRequestHandler<UpdateWorkOrderStateCommand, Result<Updated>>
 {
     private readonly ILogger<UpdateWorkOrderStateCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
     private readonly TimeProvider _dateTime = dateTime;
 
-    public async Task<Result<Success>> Handle(UpdateWorkOrderStateCommand command, CancellationToken ct)
+    public async Task<Result<Updated>> Handle(UpdateWorkOrderStateCommand command, CancellationToken ct)
     {
         var workOrder = await _context.WorkOrders
             .FirstOrDefaultAsync(a => a.Id == command.WorkOrderId, ct);
@@ -65,6 +65,6 @@ public class UpdateWorkOrderStateCommandHandler(
 
         await _cache.RemoveByTagAsync("work-order", ct);
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

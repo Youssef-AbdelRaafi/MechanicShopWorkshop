@@ -17,14 +17,14 @@ public class RelocateWorkOrderCommandHandler(
     HybridCache cache,
     IWorkOrderPolicy WorkOrderValidator
     )
-    : IRequestHandler<RelocateWorkOrderCommand, Result<Success>>
+    : IRequestHandler<RelocateWorkOrderCommand, Result<Updated>>
 {
     private readonly ILogger<RelocateWorkOrderCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
     private readonly IWorkOrderPolicy _appointmentValidator = WorkOrderValidator;
 
-    public async Task<Result<Success>> Handle(RelocateWorkOrderCommand command, CancellationToken ct)
+    public async Task<Result<Updated>> Handle(RelocateWorkOrderCommand command, CancellationToken ct)
     {
         var workOrder = await _context.WorkOrders
             .Include(a => a.RepairTasks)
@@ -97,6 +97,6 @@ public class RelocateWorkOrderCommandHandler(
 
         await _cache.RemoveByTagAsync("work-order", ct);
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

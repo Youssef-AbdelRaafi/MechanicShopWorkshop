@@ -1,4 +1,6 @@
-﻿using MechanicShop.Domain.Customers.Vehicles;
+﻿using MechanicShop.Domain.Common.Results;
+using MechanicShop.Domain.Customers;
+using MechanicShop.Domain.Customers.Vehicles;
 using MechanicShop.Domain.RepairTasks.Parts;
 using MechanicShop.Tests.Common.Customers;
 
@@ -20,7 +22,9 @@ public class CustomerTests
         var result = CustomerFactory.CreateCustomer(id: id, name: name, phoneNumber: phoneNumber, email: email, vehicles: vehicles);
 
         Assert.True(result.IsSuccess);
+
         var customer = result.Value;
+        Assert.IsType<Customer>(customer);
         Assert.NotNull(customer);
         Assert.Equal(id, customer.Id);
         Assert.Equal(name, customer.Name);
@@ -75,6 +79,7 @@ public class CustomerTests
         var result = customer.Update("Updated Name", "updated@email.com", "1234567890");
 
         Assert.True(result.IsSuccess);
+        Assert.Equal(Result.Updated, result.Value);
     }
 
     [Fact]
@@ -121,6 +126,7 @@ public class CustomerTests
         Assert.True(result.IsSuccess);
         Assert.Equal(2, customer.Vehicles.Count());
 
+        Assert.Equal(Result.Updated, result.Value);
         Assert.Contains(customer.Vehicles, v => v.Id == updatedVehicle.Id && v.Make == "UpdatedFord");
         Assert.Contains(customer.Vehicles, v => v.Id == newVehicle.Id && v.Make == "NewBrand");
     }
@@ -136,6 +142,7 @@ public class CustomerTests
 
         var result = customer.UpsertParts([incoming]);
 
+        Assert.Equal(Result.Updated, result.Value);
         Assert.True(result.IsSuccess);
         Assert.Single(customer.Vehicles);
         Assert.Equal(existing2.Id, customer.Vehicles.Single().Id);

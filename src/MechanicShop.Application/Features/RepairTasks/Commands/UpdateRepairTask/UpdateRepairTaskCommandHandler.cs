@@ -16,13 +16,13 @@ public class UpdateRepairTaskCommandHandler(
     IAppDbContext context,
     HybridCache cache
     )
-    : IRequestHandler<UpdateRepairTaskCommand, Result<Success>>
+    : IRequestHandler<UpdateRepairTaskCommand, Result<Updated>>
 {
     private readonly ILogger<UpdateRepairTaskCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
 
-    public async Task<Result<Success>> Handle(UpdateRepairTaskCommand command, CancellationToken ct)
+    public async Task<Result<Updated>> Handle(UpdateRepairTaskCommand command, CancellationToken ct)
     {
         var repairTask = await _context.RepairTasks
             .Include(rt => rt.Parts)
@@ -69,6 +69,6 @@ public class UpdateRepairTaskCommandHandler(
 
         await _cache.RemoveByTagAsync("repair-task", ct);
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

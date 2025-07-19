@@ -7,7 +7,7 @@ using MediatR;
 namespace MechanicShop.Application.Features.RepairTasks.Commands.RemoveRepairTask;
 
 public sealed record RemoveRepairTaskCommand(Guid RepairTaskId)
-    : IRequest<Result<Success>>;
+    : IRequest<Result<Deleted>>;
 
 public class RemoveRepairTaskCommandValidator : AbstractValidator<RemoveRepairTaskCommand>
 {

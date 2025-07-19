@@ -20,7 +20,7 @@ public sealed class Part : AuditableEntity
         Quantity = quantity;
     }
 
-    public Result<Success> Update(string? name, decimal cost, int quantity)
+    public Result<Updated> Update(string? name, decimal cost, int quantity)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -41,7 +41,7 @@ public sealed class Part : AuditableEntity
         Cost = cost;
         Quantity = quantity;
 
-        return Result.Success;
+        return Result.Updated;
     }
 
     public static Result<Part> Create(Guid id, string name, decimal cost, int quantity)

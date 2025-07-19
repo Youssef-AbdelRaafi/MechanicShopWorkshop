@@ -11,4 +11,4 @@ public sealed record UpdateRepairTaskCommand(
     decimal LaborCost,
     RepairDurationInMinutes EstimatedDurationInMins,
     List<UpdateRepairTaskPartCommand> Parts
-) : IRequest<Result<Success>>;
+) : IRequest<Result<Updated>>;

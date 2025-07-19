@@ -18,13 +18,13 @@ public class DeleteWorkOrderCommandHandler(
     IAppDbContext context,
     HybridCache cache
     )
-    : IRequestHandler<DeleteWorkOrderCommand, Result<Success>>
+    : IRequestHandler<DeleteWorkOrderCommand, Result<Deleted>>
 {
     private readonly ILogger<DeleteWorkOrderCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
 
-    public async Task<Result<Success>> Handle(DeleteWorkOrderCommand command, CancellationToken ct)
+    public async Task<Result<Deleted>> Handle(DeleteWorkOrderCommand command, CancellationToken ct)
     {
         var workOrder = await _context.WorkOrders
             .FirstOrDefaultAsync(a => a.Id == command.WorkOrderId, ct);
@@ -53,6 +53,6 @@ public class DeleteWorkOrderCommandHandler(
 
         await _cache.RemoveByTagAsync("work-order", ct);
 
-        return Result.Success;
+        return Result.Deleted;
     }
 }

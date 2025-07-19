@@ -1,7 +1,7 @@
 ﻿using MechanicShop.Domain.Workorders;
 using MechanicShop.Domain.Workorders.Enums;
 using MechanicShop.Tests.Common.RepaireTasks;
-using MechanicShop.Domain.Workorders;
+
 using Xunit;
 
 namespace MechanicShop.Domain.UnitTests.WorkOrders;
@@ -130,6 +130,7 @@ public class WorkOrderTests
         var result = wo.AddRepairTask(RepairTaskFactory.CreateRepairTask().Value);
 
         Assert.False(result.IsSuccess);
+        Assert.True(result.Errors.Count > 0);
     }
 
     [Fact]
@@ -203,5 +204,81 @@ public class WorkOrderTests
 
         Assert.False(result.IsSuccess);
         Assert.Equal(WorkOrderErrors.InvalidStateTransition(WorkOrderState.Scheduled, WorkOrderState.Completed).Code, result.TopError.Code);
+    }
+
+    [Fact]
+    public void UpdateLabor_ShouldReturnSuccess_AndSetNewLaborId()
+    {
+        var wo = WorkOrder.Create(
+            id: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startAt: DateTimeOffset.UtcNow,
+            endAt: DateTimeOffset.UtcNow.AddHours(1),
+            laborId: Guid.NewGuid(),
+            spot: Spot.A,
+            repairTasks: [RepairTaskFactory.CreateRepairTask().Value]).Value;
+
+        var newLabor = Guid.NewGuid();
+        var result = wo.UpdateLabor(newLabor);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(newLabor, wo.LaborId);
+    }
+
+    [Fact]
+    public void UpdateSpot_ShouldReturnSuccess_AndSetNewSpot()
+    {
+        var wo = WorkOrder.Create(
+            id: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startAt: DateTimeOffset.UtcNow,
+            endAt: DateTimeOffset.UtcNow.AddHours(1),
+            laborId: Guid.NewGuid(),
+            spot: Spot.A,
+            repairTasks: [RepairTaskFactory.CreateRepairTask().Value]).Value;
+
+        var result = wo.UpdateSpot(Spot.B);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(Spot.B, wo.Spot);
+    }
+
+    [Fact]
+    public void UpdateTiming_ShouldReturnSuccess_AndSetNewTiming()
+    {
+        var wo = WorkOrder.Create(
+            id: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startAt: DateTimeOffset.UtcNow,
+            endAt: DateTimeOffset.UtcNow.AddHours(1),
+            laborId: Guid.NewGuid(),
+            spot: Spot.A,
+            repairTasks: [RepairTaskFactory.CreateRepairTask().Value]).Value;
+
+        var newStart = wo.StartAtUtc.AddHours(2);
+        var newEnd = newStart.AddHours(1);
+        var result = wo.UpdateTiming(newStart, newEnd);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(newStart, wo.StartAtUtc);
+        Assert.Equal(newEnd, wo.EndAtUtc);
+    }
+
+    [Fact]
+    public void UpdateState_ShouldReturnSuccess_AndSetStateToInProgress()
+    {
+        var wo = WorkOrder.Create(
+            id: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startAt: DateTimeOffset.UtcNow,
+            endAt: DateTimeOffset.UtcNow.AddHours(1),
+            laborId: Guid.NewGuid(),
+            spot: Spot.A,
+            repairTasks: [RepairTaskFactory.CreateRepairTask().Value]).Value;
+
+        var result = wo.UpdateState(WorkOrderState.InProgress);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(WorkOrderState.InProgress, wo.State);
     }
 }

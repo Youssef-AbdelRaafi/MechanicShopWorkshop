@@ -22,48 +22,49 @@ public class OverdueBookingCleanupService(
     private readonly TimeProvider _dateTime = dateTime;
     private readonly AppSettings _appSettings = options.Value;
 
-    protected override async Task ExecuteAsync(CancellationToken ct)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!ct.IsCancellationRequested)
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(_appSettings.OverdueBookingCleanupFrequencyMinutes));
+
+        while (await timer.WaitForNextTickAsync(stoppingToken))
         {
+            _logger.LogInformation("Checking overdue work orders at {Now}", _dateTime.GetUtcNow());
+
             try
             {
-                _logger.LogInformation("Start cancelling overdue WorkOrder on: {Now}", _dateTime.GetUtcNow());
-
                 using var scope = _scopeFactory.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-                var overdueAppointments = await context.WorkOrders.Where(a =>
-                   a.State == WorkOrderState.Scheduled
-                && a.StartAtUtc.AddMinutes(_appSettings
-                .BookingCancellationThresholdMinutes) <= _dateTime.GetUtcNow().UtcDateTime)
-                .ToListAsync(ct);
+                var cutoff = _dateTime.GetUtcNow().AddMinutes(-_appSettings.BookingCancellationThresholdMinutes);
+                var overdue = await db.WorkOrders
+                    .Where(w => w.State == WorkOrderState.Scheduled && w.StartAtUtc <= cutoff)
+                    .ToListAsync(stoppingToken);
 
-                if (overdueAppointments.Count > 0)
+                if (overdue.Count > 0)
                 {
-                    foreach (var workOrder in overdueAppointments)
+                    foreach (var wo in overdue)
                     {
-                        workOrder.Cancel();
+                        var result = wo.Cancel();
+
+                        if (result.IsError)
+                        {
+                            _logger.LogWarning("Failed to cancel WorkOrder {Id}: {Error}", wo.Id, result.Errors);
+                        }
                     }
 
-                    await context.SaveChangesAsync(ct);
+                    await db.SaveChangesAsync(stoppingToken);
 
-                    _logger.LogInformation(
-                        "Successfully cancelled {Count} overdue bookings. Ids: {Ids}",
-                        overdueAppointments.Count,
-                        overdueAppointments.Select(a => a.Id));
+                    _logger.LogInformation("Cancelled {Count} overdue work orders: {Ids}", overdue.Count, overdue.Select(w => w.Id));
                 }
                 else
                 {
-                    _logger.LogInformation("No overdue bookings found.");
+                    _logger.LogInformation("No overdue work orders found.");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while cleaning up Scheduled bookings.");
+                _logger.LogError(ex, "Error cleaning up overdue work orders.");
             }
-
-            await Task.Delay(TimeSpan.FromMinutes(_appSettings.OverdueBookingCleanupFrequencyMinutes), ct);
         }
     }
 }

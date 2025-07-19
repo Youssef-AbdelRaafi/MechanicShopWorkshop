@@ -17,14 +17,14 @@ public class AssignLaborCommandHandler(
     HybridCache cache,
     IWorkOrderPolicy WorkOrderRuleService
     )
-    : IRequestHandler<AssignLaborCommand, Result<Success>>
+    : IRequestHandler<AssignLaborCommand, Result<Updated>>
 {
     private readonly ILogger<AssignLaborCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
     private readonly IWorkOrderPolicy _workOrderValidator = WorkOrderRuleService;
 
-    public async Task<Result<Success>> Handle(AssignLaborCommand command, CancellationToken ct)
+    public async Task<Result<Updated>> Handle(AssignLaborCommand command, CancellationToken ct)
     {
         var workOrder = await _context.WorkOrders
             .FirstOrDefaultAsync(a => a.Id == command.WorkOrderId, ct);
@@ -65,6 +65,6 @@ public class AssignLaborCommandHandler(
 
         await _cache.RemoveByTagAsync("work-order", ct);
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

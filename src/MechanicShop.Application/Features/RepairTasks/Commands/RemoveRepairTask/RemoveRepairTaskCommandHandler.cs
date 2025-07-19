@@ -16,13 +16,13 @@ public class RemoveRepairTaskCommandHandler(
     IAppDbContext context,
     HybridCache cache
     )
-    : IRequestHandler<RemoveRepairTaskCommand, Result<Success>>
+    : IRequestHandler<RemoveRepairTaskCommand, Result<Deleted>>
 {
     private readonly ILogger<RemoveRepairTaskCommandHandler> _logger = logger;
     private readonly IAppDbContext _context = context;
     private readonly HybridCache _cache = cache;
 
-    public async Task<Result<Success>> Handle(RemoveRepairTaskCommand command, CancellationToken ct)
+    public async Task<Result<Deleted>> Handle(RemoveRepairTaskCommand command, CancellationToken ct)
     {
         var repairTask = await _context.RepairTasks
             .FindAsync([command.RepairTaskId], ct);
@@ -51,6 +51,6 @@ public class RemoveRepairTaskCommandHandler(
 
         _logger.LogInformation("RepairTask {RepairTaskId} deleted successfully.", command.RepairTaskId);
 
-        return Result.Success;
+        return Result.Deleted;
     }
 }

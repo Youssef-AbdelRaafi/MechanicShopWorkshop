@@ -17,9 +17,9 @@ public class UpdateWorkOrderRepairTasksCommandHandler(
     IAppDbContext context,
     HybridCache cache,
     IWorkOrderPolicy workOrderValidator)
-    : IRequestHandler<UpdateWorkOrderRepairTasksCommand, Result<Success>>
+    : IRequestHandler<UpdateWorkOrderRepairTasksCommand, Result<Updated>>
 {
-    public async Task<Result<Success>> Handle(UpdateWorkOrderRepairTasksCommand command, CancellationToken ct)
+    public async Task<Result<Updated>> Handle(UpdateWorkOrderRepairTasksCommand command, CancellationToken ct)
     {
         var workOrder = await context.WorkOrders
             .Include(w => w.RepairTasks)
@@ -79,16 +79,16 @@ public class UpdateWorkOrderRepairTasksCommandHandler(
             return Error.Conflict("WorkOrder_Outside_OperatingHours", "WorkOrder timing exceeds business hours.");
         }
 
-        var spotCheck = await workOrderValidator.CheckSpotAvailabilityAsync(
+        var spotCheckResult = await workOrderValidator.CheckSpotAvailabilityAsync(
             workOrder.Spot,
             workOrder.StartAtUtc,
             newEndAt,
             excludeWorkOrderId: workOrder.Id,
             ct: ct);
 
-        if (spotCheck.IsError)
+        if (spotCheckResult.IsError)
         {
-            return spotCheck;
+            return spotCheckResult.Errors;
         }
 
         if (await workOrderValidator.IsLaborOccupied(workOrder.LaborId, workOrder.Id, workOrder.StartAtUtc, newEndAt))
@@ -106,6 +106,6 @@ public class UpdateWorkOrderRepairTasksCommandHandler(
 
         await cache.RemoveByTagAsync("work-order", ct);
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

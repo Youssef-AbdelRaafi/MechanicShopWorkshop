@@ -63,7 +63,7 @@ public sealed class Invoice : AuditableEntity
         return new Invoice(id, workOrderId, datetime.GetUtcNow(), items, discountAmount, taxAmount);
     }
 
-    public Result<Success> ApplyDiscount(decimal discountAmount)
+    public Result<Updated> ApplyDiscount(decimal discountAmount)
     {
         if (Status != InvoiceStatus.Unpaid)
         {
@@ -81,10 +81,11 @@ public sealed class Invoice : AuditableEntity
         }
 
         DiscountAmount = discountAmount;
-        return Result.Success;
+
+        return Result.Updated;
     }
 
-    public Result<Success> MarkAsPaid(TimeProvider timeProvider)
+    public Result<Updated> MarkAsPaid(TimeProvider timeProvider)
     {
         if (Status != InvoiceStatus.Unpaid)
         {
@@ -94,6 +95,6 @@ public sealed class Invoice : AuditableEntity
         Status = InvoiceStatus.Paid;
         PaidAt = timeProvider.GetUtcNow();
 
-        return Result.Success;
+        return Result.Updated;
     }
 }

@@ -78,7 +78,7 @@ public sealed class WorkOrder : AuditableEntity
         return new WorkOrder(id, vehicleId, startAt, endAt, laborId, spot, WorkOrderState.Scheduled, repairTasks);
     }
 
-    public Result<Success> AddRepairTask(RepairTask repairTask)
+    public Result<Updated> AddRepairTask(RepairTask repairTask)
     {
         if (!IsEditable)
         {
@@ -92,10 +92,10 @@ public sealed class WorkOrder : AuditableEntity
 
         _repairTasks.Add(repairTask);
 
-        return Result.Success;
+        return Result.Updated;
     }
 
-    public Result<Success> UpdateTiming(DateTimeOffset startAt, DateTimeOffset endAt)
+    public Result<Updated> UpdateTiming(DateTimeOffset startAt, DateTimeOffset endAt)
     {
         if (!IsEditable)
         {
@@ -110,10 +110,10 @@ public sealed class WorkOrder : AuditableEntity
         StartAtUtc = startAt;
         EndAtUtc = endAt;
 
-        return Result.Success;
+        return Result.Updated;
     }
 
-    public Result<Success> UpdateLabor(Guid laborId)
+    public Result<Updated> UpdateLabor(Guid laborId)
     {
         if (!IsEditable)
         {
@@ -126,10 +126,11 @@ public sealed class WorkOrder : AuditableEntity
         }
 
         LaborId = laborId;
-        return Result.Success;
+
+        return Result.Updated;
     }
 
-    public Result<Success> UpdateState(WorkOrderState newState)
+    public Result<Updated> UpdateState(WorkOrderState newState)
     {
         if (!CanTransitionTo(newState))
         {
@@ -138,7 +139,7 @@ public sealed class WorkOrder : AuditableEntity
 
         State = newState;
 
-        return Result.Success;
+        return Result.Updated;
     }
 
     public bool IsEditable => State is not (WorkOrderState.Completed or WorkOrderState.Cancelled or WorkOrderState.InProgress);
@@ -154,12 +155,18 @@ public sealed class WorkOrder : AuditableEntity
         };
     }
 
-    public void Cancel()
+    public Result<Updated> Cancel()
     {
+        if (!CanTransitionTo(WorkOrderState.Cancelled))
+        {
+            return WorkOrderErrors.InvalidStateTransition(State, WorkOrderState.Cancelled);
+        }
+
         State = WorkOrderState.Cancelled;
+        return Result.Updated;
     }
 
-    public Result<Success> ClearRepairTasks()
+    public Result<Updated> ClearRepairTasks()
     {
         if (!IsEditable)
         {
@@ -167,10 +174,11 @@ public sealed class WorkOrder : AuditableEntity
         }
 
         _repairTasks.Clear();
-        return Result.Success;
+
+        return Result.Updated;
     }
 
-    public Result<Success> UpdateSpot(Spot newSpot)
+    public Result<Updated> UpdateSpot(Spot newSpot)
     {
         if (!IsEditable)
         {
@@ -183,6 +191,7 @@ public sealed class WorkOrder : AuditableEntity
         }
 
         Spot = newSpot;
-        return Result.Success;
+
+        return Result.Updated;
     }
 }

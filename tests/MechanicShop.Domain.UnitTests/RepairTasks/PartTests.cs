@@ -1,4 +1,5 @@
-﻿using MechanicShop.Domain.RepairTasks.Parts;
+﻿using MechanicShop.Domain.Common.Results;
+using MechanicShop.Domain.RepairTasks.Parts;
 using MechanicShop.Tests.Common.RepaireTasks;
 
 using Xunit;
@@ -22,6 +23,7 @@ public class PartTests
         var part = result.Value;
 
         Assert.Equal(id, part.Id);
+        Assert.IsType<Part>(part);
         Assert.Equal(name, part.Name);
         Assert.Equal(cost, part.Cost);
         Assert.Equal(quantity, part.Quantity);
@@ -69,6 +71,7 @@ public class PartTests
         var result = part.Update(name, cost, quantity);
 
         Assert.True(result.IsSuccess);
+        Assert.Equal(Result.Updated, result.Value);
         Assert.Equal(name, part.Name);
         Assert.Equal(cost, part.Cost);
         Assert.Equal(quantity, part.Quantity);
