@@ -1,5 +1,5 @@
 # ----- Build Stage -----
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /build
 
 # Copy project files for restore
@@ -22,7 +22,7 @@ COPY . .
 RUN dotnet publish "src/MechanicShop.Api/MechanicShop.Api.csproj" -c Release -o /app
 
 # ----- Final Stage -----
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 
 # Install timezone data for TimeZoneInfo support
 RUN apt-get update && apt-get install -y tzdata && \
