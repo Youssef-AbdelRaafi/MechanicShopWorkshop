@@ -1,4 +1,4 @@
-﻿using MechanicShop.Application.Common.Interfaces;
+using MechanicShop.Application.Common.Interfaces;
 using MechanicShop.Infrastructure.BackgroundJobs;
 using MechanicShop.Infrastructure.Data;
 using MediatR;
@@ -17,7 +17,7 @@ namespace MechanicShop.Api.IntegrationTests.Common;
 
 public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifetime
 {
-    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
+    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
     .Build();
 
     public AppHttpClient CreateAppHttpClient()

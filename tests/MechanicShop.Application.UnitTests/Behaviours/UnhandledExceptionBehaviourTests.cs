@@ -1,4 +1,4 @@
-﻿using MechanicShop.Application.Common.Behaviours;
+using MechanicShop.Application.Common.Behaviours;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -25,7 +25,7 @@ public class UnhandledExceptionBehaviourTests
         next.Invoke().Returns("OK");
 
         // Act
-        var result = await _sut.Handle(request, next, TestContext.Current.CancellationToken);
+        var result = await _sut.Handle(request, next, CancellationToken.None);
 
         // Assert
         Assert.Equal("OK", result);
@@ -43,7 +43,7 @@ public class UnhandledExceptionBehaviourTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _sut.Handle(request, next, TestContext.Current.CancellationToken));
+            _sut.Handle(request, next, CancellationToken.None));
 
         Assert.Equal(exception, ex);
 

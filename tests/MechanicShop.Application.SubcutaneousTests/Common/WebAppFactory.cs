@@ -1,4 +1,4 @@
-﻿using MechanicShop.Api;
+using MechanicShop.Api;
 using MechanicShop.Application.Common.Interfaces;
 using MechanicShop.Infrastructure.BackgroundJobs;
 using MechanicShop.Infrastructure.Data;
@@ -23,7 +23,8 @@ namespace MechanicShop.Application.SubcutaneousTests.Common;
 
 public class WebAppFactory : WebApplicationFactory<IAssemblyMarker>, IAsyncLifetime
 {
-    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder().Build();
+    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
+    .Build();
 
     public IMediator CreateMediator()
     {
