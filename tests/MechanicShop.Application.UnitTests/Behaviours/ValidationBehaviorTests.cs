@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-
 using MechanicShop.Application.Common.Behaviours;
 using MechanicShop.Application.Features.WorkOrders.Commands.CreateWorkOrder;
 using MechanicShop.Application.Features.WorkOrders.Dtos;
@@ -38,13 +37,16 @@ public class ValidationBehaviorTests
         var workOrderResponse = WorkOrderFactory.CreateWorkOrder().Value.ToDto();
 
         _mockValidator
-            .ValidateAsync(createWorkOrderCommand, Arg.Any<CancellationToken>())
+            .ValidateAsync(createWorkOrderCommand, TestContext.Current.CancellationToken)
             .Returns(new ValidationResult());
 
-        _mockNextBehavior.Invoke().Returns(workOrderResponse);
+        _mockNextBehavior.Invoke(TestContext.Current.CancellationToken).Returns(workOrderResponse);
 
         // Act
-        var result = await _validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, default);
+        var result = await _validationBehavior.Handle(
+       createWorkOrderCommand,
+       _mockNextBehavior,
+       TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -64,7 +66,7 @@ public class ValidationBehaviorTests
             .Returns(new ValidationResult(validationFailures));
 
         // Act
-        var result = await _validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, default);
+        var result = await _validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsError);
@@ -83,10 +85,10 @@ public class ValidationBehaviorTests
 
         var workOrderResponse = WorkOrderFactory.CreateWorkOrder().Value.ToDto();
 
-        _mockNextBehavior.Invoke().Returns(workOrderResponse);
+        _mockNextBehavior.Invoke(TestContext.Current.CancellationToken).Returns(workOrderResponse);
 
         // Act
-        var result = await validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, default);
+        var result = await validationBehavior.Handle(createWorkOrderCommand, _mockNextBehavior, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

@@ -1,7 +1,5 @@
 using MechanicShop.Domain.Common;
 using MechanicShop.Domain.Common.Results;
-using MechanicShop.Domain.Customers;
-
 namespace MechanicShop.Domain.Customers.Vehicles;
 
 public sealed class Vehicle : AuditableEntity

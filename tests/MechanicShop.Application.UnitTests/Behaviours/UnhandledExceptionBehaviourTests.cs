@@ -25,7 +25,7 @@ public class UnhandledExceptionBehaviourTests
         next.Invoke().Returns("OK");
 
         // Act
-        var result = await _sut.Handle(request, next, CancellationToken.None);
+        var result = await _sut.Handle(request, next, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal("OK", result);
@@ -43,7 +43,7 @@ public class UnhandledExceptionBehaviourTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _sut.Handle(request, next, CancellationToken.None));
+            _sut.Handle(request, next, TestContext.Current.CancellationToken));
 
         Assert.Equal(exception, ex);
 
